@@ -3,16 +3,16 @@ CREATE DATABASE employee_db;
 
 USE employees_db;
 
-CREATE TABLE deprtment (
+CREATE TABLE department (
   id: INT PRIMARY KEY,
-  _name: VARCHAR(30) NOT NULL 
+  _name: VARCHAR(30) 
 );
 
 CREATE TABLE role (
     id: INT PRIMARY KEY,
     title: VARCHAR(30),
     salary: DECIMAL,
-    DEPARTMENT_id: INT
+    department_id: INT
 );
 
 CREATE TABLE employee (

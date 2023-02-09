@@ -1,12 +1,13 @@
 const express = require('express');
 //Import and require mysql2
 const mysql = require('mysql12');
+const { printTable } = require('console-table-printer');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
 
 //Express middleware
-app.use(express.urlencoded({ extended: false}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 //Connect to database
@@ -14,7 +15,7 @@ const db = mysql.createConnection(
     {
         host: 'localhost',
         //MySQL username,
-        user: '',
+        user: 'root',
         //MySQL password 
         password: '',
         database: 'employee_db',
@@ -24,9 +25,9 @@ const db = mysql.createConnection(
 
 //Create an employee
 app.post('/api/new-movie', ({ body }, res) => {
-    const sqo = `INSERT INTO employees (employee_name)
+    const sql = `INSERT INTO employees (employee_name)
         VALUES (?)`;
-    const params = [bosy.employee_name];
+    const params = [body.employee_name];
 
     db.query(sql, params, (err, result) => {
         if(err) {
