@@ -40,3 +40,7 @@ return inquirer
         }
     }) 
 };
+
+
+
+promptSelections();
