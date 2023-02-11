@@ -36,7 +36,7 @@ return inquirer
                 updateEmployeeRole();
                 break;
             default:
-                console.log("No choice selected"); 
+                process.exit(); 
         }
     }) 
 };
