@@ -1,4 +1,6 @@
 const express = require('express');
+const inquirer = require('inquirer');
+const fs = require('fs');
 //Import and require mysql2
 const mysql = require('mysql12');
 const { printTable } = require('console-table-printer');
@@ -23,8 +25,49 @@ const db = mysql.createConnection(
     console.log('Connected to the  employee_db  database')
 );
 
+const promptSelections = () => {
+
+  return inquirer
+      .prompt([
+          {
+              type:'list',
+              name:'select',
+              message:'What would you like to do?',
+              choices: ['View all departments', 'Add department', 'View all Employees', 'Add Employee', 'Update employee role', 'View all roles', 'Add role', 'EXIT']
+          },
+      ])
+      .then(selections => {
+          switch (selections) {
+              case "View all departments":
+                  viewDepartments();
+                  break;
+              case "View all roles":
+                  viewRoles();
+                  break;
+              case "View all employees":
+                  viewEmployees();
+                  break;
+              case "Add a department":
+                  addDepartment();
+                  break;
+              case "Add a role":
+                  addRole();
+                  break;
+              case "Add an employee":
+                  addEmployee();
+                  break;
+              case "Update an employee role":
+                  updateEmployeeRole();
+                  break;
+              default:
+                  process.exit(); 
+          }
+      }) 
+  };
+  
+
 //Create an employee
-app.post('/api/new-movie', ({ body }, res) => {
+app.post('/api/emoloyee_name', ({ body }, res) => {
     const sql = `INSERT INTO employees (employee_name)
         VALUES (?)`;
     const params = [body.employee_name];
@@ -88,3 +131,6 @@ app.put('/api/employee/:id', (req, res) => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
+
+
+  promptSelections();
