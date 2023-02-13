@@ -2,8 +2,8 @@ const express = require('express');
 const inquirer = require('inquirer');
 const fs = require('fs');
 //Import and require mysql2
-const mysql = require('mysql12');
-const { printTable } = require('console-table-printer');
+const mysql = require('mysql2');
+const printTable = require('console.table');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -19,7 +19,7 @@ const db = mysql.createConnection(
         //MySQL username,
         user: 'root',
         //MySQL password 
-        password: '',
+        password: '#DiaKid12',
         database: 'employee_db',
     },
     console.log('Connected to the  employee_db  database')
@@ -56,15 +56,18 @@ const promptOptions = () => {
               case "Add an employee":
                   addEmployee();
                   break;
-              case "Update an employee role":
-                  updateEmployeeRole();
+              case "Update an employee info":
+                  updateEmployeeInfo();
                   break;
               default:
                   process.exit(); 
           }
-    }) 
+    })
+    .then(answers => {
+      console.info(answers);
+    }); 
 };
-promptOptions();
+
 
 //Read all departments
 app.get('/api/department', (req, res) => {
@@ -171,7 +174,7 @@ const addRole = () => {
   .then (app.post('/api/add-role_name', ({ body }, res) => {
   const sql = `INSERT INTO role (role_name)
       VALUES (?)`;
-  const params = [body.role_name];
+  const params = [body.role_name, body.department_name, body.salary];
 
   db.query(sql, params, (err, result) => {
       if(err) {
@@ -192,14 +195,35 @@ const addEmployee = () => {
       .prompt([
           {
             type:'input',
-            name:'employee',
-            message:'What department would you like to add?',
+            name:'first_name',
+            message:'What is the employees first_name?'
+          },
+          {
+            type:'input',
+            name:'last_name',
+            message: 'What is the employees last_name?'
+          },
+          {
+            type:'input',
+            name:'employee_role',
+            message: 'What is the employee role?'
+          },
+          {
+            type: 'input',
+            name:'department_name',
+            message: 'What department the employee works in?',
+            choices: ['Sales', 'Finance', 'Engineering', 'Legal', 'Service']
+          },
+          {
+            type:'input',
+            name: 'manager',
+            message: 'Is the employee a manager?'
           },
       ])
 .then (app.post('/api/add-employee_name', ({ body }, res) => {
-  const sql = `INSERT INTO employees (employee_name)
+  const sql = `INSERT INTO employee (employee_name)
       VALUES (?)`;
-  const params = [body.employee_name];
+  const params = [body.first_name, body.last_name, body.role_name, body.department_name, body.manager];
 
   db.query(sql, params, (err, result) => {
       if(err) {
@@ -213,10 +237,46 @@ const addEmployee = () => {
   });
 }));
 };
-//Update employee name
-app.put('/api/employee/:id', (req, res) => {
+//Update employee
+const updateEmployeeInfo = () => {
+
+  return inquirer
+      .prompt([
+          {
+            type:'input',
+            name:'first_name',
+            message:'What is the employees first_name?'
+          },
+          {
+            type:'input',
+            name:'last_name',
+            message: 'What is the employees last_name?'
+          },
+          {
+            type:'input',
+            name:'employee_role',
+            message: 'What is the employee role?'
+          },
+          {
+            type: 'input',
+            name:'department_name',
+            message: 'What department the employee works in?',
+            choices: ['Sales', 'Finance', 'Engineering', 'Legal', 'Service']
+          },
+          {
+            type: 'input',
+            name: 'salary',
+            message: 'Enter the salary?' 
+          },
+          {
+            type:'input',
+            name: 'manager',
+            message: 'Is the employee a manager?'
+          },
+      ])
+.then(app.put('/api/employee/:id', (req, res) => {
     const sql = `UPDATE employee SET employee = ? WHERE id = ?`;
-    const params = [req.body.review, req.params.id];
+    const params = [req.body.role_name, req.params.id, req.body.department_name, req.body.salary];
   
     db.query(sql, params, (err, result) => {
       if (err) {
@@ -233,7 +293,8 @@ app.put('/api/employee/:id', (req, res) => {
         });
       }
     });
-  });
+  }));
+};
 
   //Delete employee
   app.delete('/api/employee:id', (req, res) => {
@@ -262,9 +323,15 @@ app.put('/api/employee/:id', (req, res) => {
     res.status(404).end();
   });
   
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  // app.listen(PORT, () => {
+  //   console.log(`Server running on port ${PORT}`);
+  // });
 
-
+  promptOptions();
+  printTable(results);
+  addDepartment();
+  addRole();
+  addEmployee();
+  updateEmployeeInfo();
+  
  
