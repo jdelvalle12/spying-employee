@@ -19,11 +19,11 @@ VALUES (01, "Sales Lead",100000, 1),
        (08, "Lawyer ",190000, 8);
 
 INSERT INTO employee (id, first_name, last_name, role_id, manager_id)
-VALUES (001, "Jose","Del Valle" , 01, "null"),
-       (002, "Mike","Chan" , 02, "Jose Del Valle "),
-       (003, "Ashley","Rodriguez" , 03, "null"),
-       (004, "Kevin","Tupik" , 04, "Ashley Rodriguez"),
-       (005, "Kunal","Singh" , 05, "null"),
-       (006, "Malia","Brown" , 06, "Kunal Singh"),
-       (007, "Sarah","Lourd" , 07, "null"),
-       (008, "Tom","Allen" , 08, "Sarah Lourd");
+VALUES (001, "Jose","Del Valle" , 01, NULL),
+       (002, "Mike","Chan" , 02, 001),
+       (003, "Ashley","Rodriguez" , 03, NULL),
+       (004, "Kevin","Tupik" , 04, 003),
+       (005, "Kunal","Singh" , 05, NULL),
+       (006, "Malia","Brown" , 06, 005),
+       (007, "Sarah","Lourd" , 07, NULL),
+       (008, "Tom","Allen" , 08, 007);
