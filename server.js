@@ -3,7 +3,7 @@ const inquirer = require('inquirer');
 const fs = require('fs');
 //Import and require mysql2
 const mysql = require('mysql2');
-const printTable = require('console.table');
+const { printTable } = require('console-table-printer');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -25,17 +25,15 @@ const db = mysql.createConnection(
     console.log('Connected to the  employees_db  database')
 );
 
-const promptOptions = () => {
-
-  return inquirer
-      .prompt([
+ inquirer
+      .prompt(
           {
               type:'list',
               name:'select',
               message:'What would you like to do?',
               choices: ['View all departments', 'Add department', 'View all Employees', 'Add Employee', 'Update employee role', 'View all roles', 'Add role', 'EXIT']
           },
-      ])
+      )
       .then(options => {
           switch (options) {
               case "View all departments":
@@ -66,7 +64,7 @@ const promptOptions = () => {
     .then(answers => {
       console.info(answers);
     }); 
-};
+
 
 
 //Read all departments
@@ -121,17 +119,15 @@ app.get('/api/employee', (req, res) => {
 });
 
 //Add a department
-const addDepartment = () => {
-
-  return inquirer
-      .prompt([
+ inquirer
+      .prompt(
           {
               type:'input',
               name:'department',
               message:'What department would you like to add?',
           },
-      ])
-      .then (app.post('/api/add-department_name', ({ body }, res) => {
+      )
+      .then (app.post('/api/department_name', ({ body }, res) => {
         const sql = `INSERT INTO department (department_name)
             VALUES (?)`;
         const params = [body.department_name];
@@ -149,12 +145,10 @@ const addDepartment = () => {
         });
       })
     )  
-};
-//Add a role
-const addRole = () => {
 
-  return inquirer
-    .prompt([
+//Add a role
+ inquirer
+    .prompt(
           {
             type:'input',
             name:'role',
@@ -170,8 +164,8 @@ const addRole = () => {
             name: 'salary',
             message: 'Enter the salary?'
           }
-  ])
-  .then (app.post('/api/add-role_name', ({ body }, res) => {
+  )
+  .then (app.post('/api/role_name', ({ body }, res) => {
   const sql = `INSERT INTO role (role_name)
       VALUES (?)`;
   const params = [body.role_name, body.department_name, body.salary];
@@ -187,12 +181,10 @@ const addRole = () => {
       });
     });
   }));
-};
-//Add an employee
-const addEmployee = () => {
 
-  return inquirer
-      .prompt([
+//Add an employee
+ inquirer
+      .prompt(
           {
             type:'input',
             name:'first_name',
@@ -219,8 +211,8 @@ const addEmployee = () => {
             name: 'manager',
             message: 'Is the employee a manager?'
           },
-      ])
-.then (app.post('/api/add-employee_name', ({ body }, res) => {
+      )
+.then (app.post('/api/employee_name', ({ body }, res) => {
   const sql = `INSERT INTO employee (employee_name)
       VALUES (?)`;
   const params = [body.first_name, body.last_name, body.role_name, body.department_name, body.manager];
@@ -236,12 +228,10 @@ const addEmployee = () => {
       });
   });
 }));
-};
-//Update employee
-const updateEmployeeInfo = () => {
 
-  return inquirer
-      .prompt([
+//Update employee
+ inquirer
+      .prompt(
           {
             type:'input',
             name:'first_name',
@@ -273,7 +263,7 @@ const updateEmployeeInfo = () => {
             name: 'manager',
             message: 'Is the employee a manager?'
           },
-      ])
+      )
 .then(app.put('/api/employee/:id', (req, res) => {
     const sql = `UPDATE employee SET employee = ? WHERE id = ?`;
     const params = [req.body.role_name, req.params.id, req.body.department_name, req.body.salary];
@@ -294,7 +284,7 @@ const updateEmployeeInfo = () => {
       }
     });
   }));
-};
+
 
   //Delete employee
   app.delete('/api/employee:id', (req, res) => {
@@ -323,15 +313,15 @@ const updateEmployeeInfo = () => {
     res.status(404).end();
   });
   
-  // app.listen(PORT, () => {
-  //   console.log(`Server running on port ${PORT}`);
-  // });
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 
-  promptOptions();
-  printTable(results);
-  addDepartment();
-  addRole();
-  addEmployee();
-  updateEmployeeInfo();
+  // promptOptions();
+  // printTable(results);
+  // addDepartment();
+  // addRole();
+  // addEmployee();
+  // updateEmployeeInfo();
   
  
