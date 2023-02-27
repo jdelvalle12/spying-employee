@@ -25,7 +25,7 @@ const db = mysql.createConnection(
     console.log('Connected to the employees database')
 );
 
-function optionMenu () {
+function optionsMenu () {
  inquirer .prompt([
           {
               type:'list',
@@ -71,8 +71,9 @@ function viewDepartments () {
   db.query( `SELECT * FROM department`, function (err,results) {
  
     if (err) throw err;
-    printTable(results);
-    optionMenu();
+    // printTable(results);
+    console.table(results);
+    optionsMenu();
       });
       
 };
@@ -83,7 +84,7 @@ function viewRoles () {
 
     if (err) throw err
       printTable(results);
-      optionMenu();
+      optionsMenu();
   });
   
 };
@@ -94,7 +95,7 @@ function viewAllEmployees () {
   
     if (err) throw err;
       printTable(results);
-      optionMenu();
+      optionsMenu();
   });
  
 };
@@ -115,7 +116,7 @@ function addDepartment () {
         db.query(sql, params, (err, results) => {
           if (err) throw err;
             printTable(results);
-            optionMenu();
+            optionsMenu();
         });
         
       }
@@ -148,7 +149,7 @@ function addRole () {
   db.query(sql, params, (err, result) => {
     if (err) throw err;
       printTable(result);
-      optionMenu();
+      optionsMenu();
     });
    
   });
@@ -168,7 +169,7 @@ function addEmployee () {
           },
           {
             type:'input',
-            name:'title',
+            name:'role_id',
             message: 'What is the employee role?'
           },
           {
@@ -179,19 +180,19 @@ function addEmployee () {
           },
           {
             type:'input',
-            name: 'manager',
+            name: 'manager_id',
             message: 'Is the employee a manager?'
           },
         ])
-        .then(({ first_name, last_name, title, department_name, manager}) => {
-          const sql = `INSERT INTO employee (first_name, last_name, title, department_name, manager)
+        .then(({ first_name, last_name, role_id, department_name, manager_id}) => {
+          const sql = `INSERT INTO employee (first_name, last_name, role_id, department_name, manager_id)
             VALUES (?)`;
-          const params = [first_name, last_name, title, department_name, manager];
+          const params = [first_name, last_name, role_id, department_name, manager_id];
 
           db.query(sql, params, (err, result) => {
            if (err) throw err;
             printTable(result);
-            optionMenu();
+            optionsMenu();
     });
      
   });
@@ -231,14 +232,14 @@ function updateEmployeeRole () {
             message: 'Is the employee a manager?'
           },
         ])
-        .then(({first_name, last_name, title, id, department_name, salary}) => {
+        .then(({first_name, last_name, role_id, id, department_name, salary}) => {
           const sql = `UPDATE employee SET employee = ? WHERE id = ?`;
-          const params = [first_name, last_name, title, id, department_name, salary];
+          const params = [first_name, last_name, role_id, id, department_name, salary];
   
           db.query(sql, params, (err, result) => {
             if (err) throw err;
             printTable(result);
-            optionMenu();
+            optionsMenu();
           });
           
         });
@@ -276,8 +277,9 @@ function updateEmployeeRole () {
     console.log(`Server running on port ${PORT}`);
   });
 
+  optionsMenu();
+
   
   
 
   
- 
