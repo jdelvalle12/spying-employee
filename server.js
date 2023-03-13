@@ -113,7 +113,7 @@ function viewAllEmployees () {
  
 };
 
-//Add a department
+//Function to add a department
 function addDepartment () {
  inquirer .prompt(
           {
@@ -135,7 +135,7 @@ function addDepartment () {
       }
 )};  
 
-//Add a role
+//Function to add a role
 function addRole () {
   db.query("SELECT id value, department_name FROM department", function (err, res) {
     if (err) throw err;
@@ -158,26 +158,23 @@ function addRole () {
           }
         ])
   .then (({ title, department_name, salary }) => {
-  const sql = `INSERT INTO role (title, department_name, salary)
-      VALUES (?, ?, ?)`;
-  const params = [title, department_name, salary];
+    const sql = `INSERT INTO role (title, department_name, salary)
+        VALUES (?, ?, ?)`;
+    const params = [title, department_name, salary];
 
-  db.query(sql, params, (err, result) => {
-    if (err) throw err;
-      viewRoles();
+      db.query(sql, params, (err, res) => {
+        if (err) throw err;
+        viewRoles();
+      });
     });
-   
-  });
   });
 };
-//Add an employee
+//Function to add an employee
 function addEmployee () {
   db.query("SELECT id value, title name FROM employee_role", function (err, res) {
     if (err) throw err;
     db.query(`SELECT concat(first_name, ' ', last_name) name, id value FROM employee`, 
-    function (err, employeeRes)) {
-
-    
+    function (err, empRes) {
       inquirer .prompt([
         {
           type:'input',
@@ -192,7 +189,8 @@ function addEmployee () {
           {
             type:'input',
             name:'role_id',
-            message: 'What is the employee role?'
+            message: 'What is the employee role?',
+            choices: res
           },
           {
             type: 'input',
@@ -203,26 +201,27 @@ function addEmployee () {
           {
             type:'input',
             name: 'manager_id',
-            message: 'Is the employee a manager?'
+            message: 'Is the employee a manager?',
+            choices: empRes
           },
         ])
         .then(({ first_name, last_name, role_id, department_name, manager_id}) => {
           const sql = `INSERT INTO employee (first_name, last_name, role_id, department_name, manager_id)
-          VALUES (?)`;
+          VALUES (?, ?, ?, ?, ?)`;
           const params = [first_name, last_name, role_id, department_name, manager_id];
           
-          db.query(sql, params, (err, result) => {
+          db.query(sql, params, (err, res) => {
             if (err) throw err;
-            printTable(result);
-            optionsMenu();
+            console.log("New employee added into database");
+            viewAllEmployees();
           });
-          
         });
       });
-      };
-      //Update employee
-      function updateEmployeeRole () {
-        inquirer .prompt([
+    });
+};
+//Function to update employee role
+function updateEmployeeRole () {
+    inquirer .prompt([
           {
             type:'input',
             name:'first_name',
@@ -255,9 +254,9 @@ function addEmployee () {
             message: 'Is the employee a manager?'
           },
         ])
-        .then(({first_name, last_name, role_id, id, department_name, salary}) => {
-          const sql = `UPDATE employee SET employee = ? WHERE id = ?`;
-          const params = [first_name, last_name, role_id, id, department_name, salary];
+          .then(({first_name, last_name, role_id, id, department_name, salary}) => {
+            const sql = `UPDATE employee SET employee = ? WHERE id = ?`;
+            const params = [first_name, last_name, role_id, id, department_name, salary];
   
           db.query(sql, params, (err, result) => {
             if (err) throw err;
