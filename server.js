@@ -1,6 +1,7 @@
+//Import requirements
 const express = require('express');
 const inquirer = require('inquirer');
-const fs = require('fs');
+
 //Import and require mysql2
 const mysql = require('mysql2');
 const { printTable } = require('console-table-printer');
@@ -9,7 +10,7 @@ const PORT = process.env.PORT || 3001;
 const app = express();
 
 //Express middleware
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 //Connect to database
@@ -25,16 +26,27 @@ const db = mysql.createConnection(
     console.log('Connected to the employees database')
 );
 
-function optionsMenu () {
+runApp();
+
+//Initializing app
+function runApp () {
  inquirer .prompt([
           {
               type:'list',
-              name:'options',
+              name:'questions',
               message:'What would you like to do?',
               choices: ['View all departments', 'Add department', 'View all Employees', 'Add Employee', 'Update employee role', 'View all roles', 'Add role', 'EXIT']
           },
         ])
-      .then(options => {
+      .then(answer => {
+        console.log(answer);
+        userInput(answer);
+      })
+};
+
+//Switch function
+function userInput(answer) {
+  const options = answer.questions;
           switch (options) {
               case "View all departments":
                   viewDepartments();
@@ -59,56 +71,57 @@ function optionsMenu () {
                   updateEmployeeRole();
                   return;
               default:
-                  process.exit(); 
-          }
-    }); 
+                  console.log("Please select an option!");
+                  runApp(); 
+          } 
 };
 
 
 
-//Read all departments
+//Function to read all departments
 function viewDepartments () {
   db.query( `SELECT * FROM department`, function (err,results) {
  
     if (err) throw err;
-    // printTable(results);
-    console.table(results);
-    optionsMenu();
-      });
+    printTable(results);
+    promptExit();
+    })
       
 };
 
-//Read all roles
+//Function to read all roles
 function viewRoles () {
-  db.query( `SELECT * FROM role`, function (err, results) {
+  db.query( `SELECT employee_role.id, employee_role.title, department.department_name 
+  FROM employee_role LEFT JOIN department ON employee_role.department_id`,function (err, results) {
 
-    if (err) throw err
-      printTable(results);
-      optionsMenu();
-  });
-  
+   if (err) throw err
+    printTable(results);
+    promptExit();
+  });  
 };
 
-//Read all employees
+//Function to read all employees
 function viewAllEmployees () {
-  db.query( `SELECT * FROM employee`, function (err, results) {
+  db.query( `SELECT employee.id, employee.first_name, employee.last_name, employee_role.title, concat(mgr.first_name, ' ', mge.last_name) 
+  AS manager FROM employee LEFT JOIN employee_role ON employee.role_id = employee_rold.id LEFT JOIN employee
+  AS mgr ON employee.manager_id = mgr.id`, function (err, results) {
   
-    if (err) throw err;
-      printTable(results);
-      optionsMenu();
-  });
+  if (err) throw err;
+    printTable(results);
+    promptExit();
+  })
  
 };
 
 //Add a department
 function addDepartment () {
- inquirer .prompt([
+ inquirer .prompt(
           {
               type:'input',
               name:'department_name',
               message:'What department would you like to add?',
           },
-        ])
+        )
       .then (({ department_name }) => {
         const sql = `INSERT INTO department (department_name)
             VALUES (?)`;
@@ -124,6 +137,9 @@ function addDepartment () {
 
 //Add a role
 function addRole () {
+  db.query("SELECT id value, department_name FROM department", function (err, res) {
+    if (err) throw err;
+  
  inquirer .prompt([
           {
             type:'input',
@@ -143,26 +159,32 @@ function addRole () {
         ])
   .then (({ title, department_name, salary }) => {
   const sql = `INSERT INTO role (title, department_name, salary)
-      VALUES (?)`;
+      VALUES (?, ?, ?)`;
   const params = [title, department_name, salary];
 
   db.query(sql, params, (err, result) => {
     if (err) throw err;
-      printTable(result);
-      optionsMenu();
+      viewRoles();
     });
    
+  });
   });
 };
 //Add an employee
 function addEmployee () {
- inquirer .prompt([
-          {
-            type:'input',
-            name:'first_name',
-            message:'What is the employees first_name?'
-          },
-          {
+  db.query("SELECT id value, title name FROM employee_role", function (err, res) {
+    if (err) throw err;
+    db.query(`SELECT concat(first_name, ' ', last_name) name, id value FROM employee`, 
+    function (err, employeeRes)) {
+
+    
+      inquirer .prompt([
+        {
+          type:'input',
+          name:'first_name',
+          message:'What is the employees first_name?'
+        },
+        {
             type:'input',
             name:'last_name',
             message: 'What is the employees last_name?'
@@ -186,20 +208,21 @@ function addEmployee () {
         ])
         .then(({ first_name, last_name, role_id, department_name, manager_id}) => {
           const sql = `INSERT INTO employee (first_name, last_name, role_id, department_name, manager_id)
-            VALUES (?)`;
+          VALUES (?)`;
           const params = [first_name, last_name, role_id, department_name, manager_id];
-
+          
           db.query(sql, params, (err, result) => {
-           if (err) throw err;
+            if (err) throw err;
             printTable(result);
             optionsMenu();
-    });
-     
-  });
-};
-//Update employee
-function updateEmployeeRole () {
- inquirer .prompt([
+          });
+          
+        });
+      });
+      };
+      //Update employee
+      function updateEmployeeRole () {
+        inquirer .prompt([
           {
             type:'input',
             name:'first_name',
