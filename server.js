@@ -128,8 +128,7 @@ function addDepartment () {
         const params = [department_name];
         db.query(sql, params, (err, results) => {
           if (err) throw err;
-            printTable(results);
-            optionsMenu();
+            viewDepartments();
         });
         
       }
