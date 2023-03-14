@@ -221,51 +221,55 @@ function addEmployee () {
 };
 //Function to update employee role
 function updateEmployeeRole () {
-    inquirer .prompt([
+  db.query("SELECT id value, title name FROM employee_role", function (err, res) {
+    if (err) throw err;
+    db.query(`SELECT concat(first_name, ' ', last_name) name, id value FROM employee`, function (err, empRes) {
+      inquirer .prompt([
           {
-            type:'input',
-            name:'first_name',
-            message:'What is the employees first_name?'
+            type:'list',
+            name:'employee_id',
+            message:'What is the employee_id?',
+            choices: empRes
           },
           {
-            type:'input',
-            name:'last_name',
-            message: 'What is the employees last_name?'
+            type:'list',
+            name:'role_id',
+            message: 'What is the new role_id?'
           },
-          {
-            type:'input',
-            name:'title',
-            message: 'What is the employee role?'
-          },
-          {
-            type: 'input',
-            name:'department_name',
-            message: 'What department the employee works in?',
-            choices: ['Sales', 'Finance', 'Engineering', 'Legal', 'Service']
-          },
-          {
-            type: 'input',
-            name: 'salary',
-            message: 'Enter the salary?' 
-          },
-          {
-            type:'input',
-            name: 'manager',
-            message: 'Is the employee a manager?'
-          },
+          
         ])
-          .then(({first_name, last_name, role_id, id, department_name, salary}) => {
-            const sql = `UPDATE employee SET employee = ? WHERE id = ?`;
-            const params = [first_name, last_name, role_id, id, department_name, salary];
+          .then(({employee_id, role_id}) => {
+            const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+            const params = [employee_id, role_id];
   
-          db.query(sql, params, (err, result) => {
+          db.query(sql, params, (err, res) => {
             if (err) throw err;
-            printTable(result);
-            optionsMenu();
+            
+            viewAllEmployees();
           });
           
         });
-      };
+      });
+    });
+  };
+
+  function promptExit() {
+    inquirer.prompt ({
+        type: "list",
+        name: "exitPrompt",
+        message: "Would you like to exit or continue",
+        choices: ["Restart", "Exit"]
+    })
+      .then(function (answer) {
+        if (answer.exitPrompt === 'Restart') {
+        runApp();
+      } else {
+        console.log("Goodbye");
+        db.end();
+        provess.exit(0);
+      }
+    });
+  };
 
 
   //Delete employee
@@ -299,7 +303,7 @@ function updateEmployeeRole () {
     console.log(`Server running on port ${PORT}`);
   });
 
-  optionsMenu();
+ 
 
   
   
