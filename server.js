@@ -270,29 +270,6 @@ function updateEmployeeRole () {
       }
     });
   };
-
-
-  //Delete employee
-  // app.delete('/api/employee:id', (req, res) => {
-  //   const sql = `DELETE FROM employee WHERE id = ?`;
-  //   const params = [req.params.id];
-    
-  //   db.query(sql, params, (err, results) => {
-  //     if (err) {
-  //       res.statusMessage(400).json({ error: res.message });
-  //     } else if (!results.affectedRows) {
-  //       res.json({
-  //       message: 'Employee not found'
-  //       });
-  //     } else {
-  //       res.json({
-  //         message: 'deleted',
-  //         changes: results.affectedRows,
-  //         id: req.params.id
-  //       });
-  //     }
-  //   });
-  // });
   
   // Default response for any other request (Not Found)
   app.use((req, res) => {
