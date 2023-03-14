@@ -91,8 +91,8 @@ function viewDepartments () {
 
 //Function to read all roles
 function viewRoles () {
-  db.query( `SELECT employee_role.id, employee_role.title, department.department_name 
-  FROM employee_role LEFT JOIN department ON employee_role.department_id`,function (err, results) {
+  db.query( `SELECT role.id, role.title, department.department_name 
+  FROM role LEFT JOIN department ON role.department_id`,function (err, results) {
 
    if (err) throw err
     printTable(results);
@@ -102,8 +102,8 @@ function viewRoles () {
 
 //Function to read all employees
 function viewAllEmployees () {
-  db.query( `SELECT employee.id, employee.first_name, employee.last_name, employee_role.title, concat(mgr.first_name, ' ', mge.last_name) 
-  AS manager FROM employee LEFT JOIN employee_role ON employee.role_id = employee_rold.id LEFT JOIN employee
+  db.query( `SELECT employee.id, employee.first_name, employee.last_name, role.title, concat(mgr.first_name, ' ', mgr.last_name) 
+  AS manager FROM employee LEFT JOIN role ON role_id = role.id LEFT JOIN employee
   AS mgr ON employee.manager_id = mgr.id`, function (err, results) {
   
   if (err) throw err;
@@ -148,8 +148,8 @@ function addRole () {
           },
           {
             type:'input',
-            name:'department_name',
-            message: 'Enter the department?'
+            name:'department_id',
+            message: 'Enter the department id?'
           },
           {
             type: 'input',
@@ -157,10 +157,10 @@ function addRole () {
             message: 'Enter the salary?'
           }
         ])
-  .then (({ title, department_name, salary }) => {
-    const sql = `INSERT INTO role (title, department_name, salary)
+  .then (({ title, department_id, salary }) => {
+    const sql = `INSERT INTO role (title, department_id, salary)
         VALUES (?, ?, ?)`;
-    const params = [title, department_name, salary];
+    const params = [title, department_id, salary];
 
       db.query(sql, params, (err, res) => {
         if (err) throw err;
@@ -171,7 +171,7 @@ function addRole () {
 };
 //Function to add an employee
 function addEmployee () {
-  db.query("SELECT id value, title name FROM employee_role", function (err, res) {
+  db.query("SELECT id value, title name FROM role", function (err, res) {
     if (err) throw err;
     db.query(`SELECT concat(first_name, ' ', last_name) name, id value FROM employee`, 
     function (err, empRes) {
@@ -194,9 +194,8 @@ function addEmployee () {
           },
           {
             type: 'input',
-            name:'department_name',
-            message: 'What department the employee works in?',
-            choices: ['Sales', 'Finance', 'Engineering', 'Legal', 'Service']
+            name:'department_id',
+            message: 'Enter department id?',
           },
           {
             type:'input',
@@ -205,10 +204,10 @@ function addEmployee () {
             choices: empRes
           },
         ])
-        .then(({ first_name, last_name, role_id, department_name, manager_id}) => {
-          const sql = `INSERT INTO employee (first_name, last_name, role_id, department_name, manager_id)
+        .then(({ first_name, last_name, role_id, department_id, manager_id}) => {
+          const sql = `INSERT INTO employee (first_name, last_name, role_id, department_id, manager_id)
           VALUES (?, ?, ?, ?, ?)`;
-          const params = [first_name, last_name, role_id, department_name, manager_id];
+          const params = [first_name, last_name, role_id, department_id, manager_id];
           
           db.query(sql, params, (err, res) => {
             if (err) throw err;
@@ -221,7 +220,7 @@ function addEmployee () {
 };
 //Function to update employee role
 function updateEmployeeRole () {
-  db.query("SELECT id value, title name FROM employee_role", function (err, res) {
+  db.query("SELECT id value, title name FROM role", function (err, res) {
     if (err) throw err;
     db.query(`SELECT concat(first_name, ' ', last_name) name, id value FROM employee`, function (err, empRes) {
       inquirer .prompt([
@@ -234,7 +233,8 @@ function updateEmployeeRole () {
           {
             type:'list',
             name:'role_id',
-            message: 'What is the new role_id?'
+            message: 'What is the new role_id?',
+            choices: res
           },
           
         ])
@@ -258,15 +258,15 @@ function updateEmployeeRole () {
         type: "list",
         name: "exitPrompt",
         message: "Would you like to exit or continue",
-        choices: ["Restart", "Exit"]
+        choices: ["Continue", "Exit"]
     })
       .then(function (answer) {
-        if (answer.exitPrompt === 'Restart') {
+        if (answer.exitPrompt === 'Continue') {
         runApp();
       } else {
         console.log("Goodbye");
         db.end();
-        provess.exit(0);
+        process.exit(0);
       }
     });
   };
